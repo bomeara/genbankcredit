@@ -58,6 +58,15 @@ read.GenBank <-
             tmp[[i]] <- gsub("\\s+PUBMED\\s+(\\d+)", "\\1", X[pub[pub > front & pub < endPub[i]]])
         }
         attr(obj, "pubmed") <- tmp
+#Commented out code below isn't quite working yet        
+#        Y <- paste(X, collapse=" ")
+#        Y <- strsplit(Y, "ORIGIN")[[1]]
+#        tmp <- vector("list", length(Y))
+#        for (i in sequence(length(Y))) {
+#        	references <- regmatches(Y[i],regexpr("AUTHORS.*REFERENCE", Y[i]))
+#	        tmp[i] <- gsub("  *", " ", gsub("REFERENCE", "",gsub("TITLE", "", gsub("AUTHORS", "", references))))
+#        }
+#		print(tmp)
     }
     obj
 }
