@@ -9,7 +9,7 @@
 
 read.GenBank <-
     function(access.nb, seq.names = access.nb, species.names = TRUE,
-             gene.names = FALSE, as.character = FALSE)
+             gene.names = FALSE, as.character = FALSE, pubmed = TRUE)
 {
     N <- length(access.nb)
     ## If there are more than 400 sequences, we need to break down the
@@ -48,6 +48,14 @@ read.GenBank <-
         for (i in 1:N)
             tmp[i] <- unlist(strsplit(X[sp[i + 1L]], " +/gene=\""))[2]
         attr(obj, "gene") <- gsub("\"$", "", tmp)
+    }
+    if (pubmed) {
+        tmp <- character(N)
+        pub <- grep("PUBMED", X, value=TRUE)
+        for (i in 1:N) {
+            tmp[i] <- gsub("\\s+PUBMED\\s+(\\d+)", "\\1", pub[i])
+        }
+        attr(obj, "pubmed") <- tmp
     }
     obj
 }
