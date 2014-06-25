@@ -50,12 +50,16 @@ read.GenBank <-
         attr(obj, "gene") <- gsub("\"$", "", tmp)
     }
     if (pubmed) {
-        tmp <- character(N)
-        pub <- grep("PUBMED", X, value=TRUE)
+        tmp <- vector("list", N)
+        endPub <- grep("//", X)
+        pub <- grep("PUBMED", X)
         for (i in 1:N) {
-            tmp[i] <- gsub("\\s+PUBMED\\s+(\\d+)", "\\1", pub[i])
+            front <- ifelse(i == 1, 0, endPub[i-1])
+            tmp[[i]] <- gsub("\\s+PUBMED\\s+(\\d+)", "\\1", X[pub[pub > front & pub < endPub[i]]])
         }
         attr(obj, "pubmed") <- tmp
     }
     obj
 }
+
+xx <- read.GenBank(c("182765453", ref))
