@@ -61,5 +61,3 @@ read.GenBank <-
     }
     obj
 }
-
-xx <- read.GenBank(c("182765453", ref))
