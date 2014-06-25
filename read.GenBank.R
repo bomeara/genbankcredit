@@ -29,8 +29,9 @@ read.GenBank <-
     LA <- which(X == "//") - 1
     obj <- vector("list", N)
     for (i in 1:N) {
+        message(access.nb[i])
         ## remove all spaces and digits
-        tmp <- gsub("[[:digit:] ]", "", X[FI[i]:LA[i]])
+        tmp <- gsub("[[:digit:]]", "", X[FI[i]:LA[i]])
         obj[[i]] <- unlist(strsplit(tmp, NULL))
     }
     names(obj) <- seq.names
