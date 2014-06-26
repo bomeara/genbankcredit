@@ -29,7 +29,6 @@ read.GenBank <-
     LA <- which(X == "//") - 1
     obj <- vector("list", N)
     for (i in 1:N) {
-        message(access.nb[i])
         ## remove all spaces and digits
         tmp <- gsub("[[:digit:]]", "", X[FI[i]:LA[i]])
         obj[[i]] <- unlist(strsplit(tmp, NULL))
@@ -53,21 +52,31 @@ read.GenBank <-
     if (pubmed) {
         tmp <- vector("list", N)
         endPub <- grep("//", X)
-        pub <- grep("PUBMED", X)
+        refs <- grep("^REFERENCE", X)
+        pub <- grep("^\\s+PUBMED", X)
+        auth <- grep("^\\s+AUTHORS", X)
+        title <- grep("^\\s+TITLE", X)
+        journal <- grep("^\\s+JOURNAL", X)
+        feat <- grep("^FEATURES", X)
         for (i in 1:N) {
-            front <- ifelse(i == 1, 0, endPub[i-1])
-            tmp[[i]] <- gsub("\\s+PUBMED\\s+(\\d+)", "\\1", X[pub[pub > front & pub < endPub[i]]])
+            begPub <- ifelse(i == 1, 1, endPub[i-1])
+            nRefs <- refs[refs > begPub & refs < endPub[i]]
+            refLst <- vector("list", length(nRefs))
+            for (j in 1:length(nRefs)) {
+                rgRef <- c( nRefs[j], ifelse(j == length(nRefs), feat[i], nRefs[j+1]))
+                tmpRes <- vector("list", 4)
+                names(tmpRes) <- c("pubmedid", "authors", "title", "journal")
+                tmpRes$pubmedid <- gsub("^\\s+PUBMED\\s+(\\d+)", "\\1", X[pub[pub > rgRef[1] & pub < rgRef[2]]])
+                tmpRes$authors <- paste0(X[auth[j]:(title[j]-1)], collapse=" ")
+                tmpRes$title <- paste0(X[title[j]:(journal[j]-1)], collapse=" ")
+                tmpRes$journal <- paste0(X[journal[j]], collapse=" ") # JOURNAL always 1 line?
+                tmpRes <- lapply(tmpRes, function(x) { gsub("\\s{2,}", " ", gsub("\\s+[A-Z]+\\s+", "", x)) })
+                refLst[[j]] <- tmpRes
+            }
+            tmp[[i]] <- refLst
         }
-        attr(obj, "pubmed") <- tmp
-#Commented out code below isn't quite working yet        
-#        Y <- paste(X, collapse=" ")
-#        Y <- strsplit(Y, "ORIGIN")[[1]]
-#        tmp <- vector("list", length(Y))
-#        for (i in sequence(length(Y))) {
-#        	references <- regmatches(Y[i],regexpr("AUTHORS.*REFERENCE", Y[i]))
-#	        tmp[i] <- gsub("  *", " ", gsub("REFERENCE", "",gsub("TITLE", "", gsub("AUTHORS", "", references))))
-#        }
-#		print(tmp)
+        names(tmp) <- access.nb
+        attr(obj, "references") <- tmp
     }
     obj
 }
